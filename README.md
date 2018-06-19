@@ -1,2 +1,2 @@
 # jsix
-JISX is a UNIX like operating system with a kernal and shell written in javascript
+JISX is a UNIX like operating system with a kernel and shell written in javascript
