@@ -1,6 +1,6 @@
 {
   "name": "jsix",
-  "description": "UNIX kernal and shell in javascript. JSIX",
+  "description": "UNIX kernel and shell in javascript. JSIX",
   "author": "Jeremy Ebert",
   "version": "0.0.1",
   "dependencies": {
@@ -12,6 +12,6 @@
     "type": "git",
     "url": "https://github.com/PrimeEuler/jsix.git"
    },
-   "keywords": [ "Kernal", "shell", "UNIX", "JSIX" ],
+   "keywords": [ "kernel", "shell", "UNIX", "JSIX" ],
    "license": "MIT"
 }
