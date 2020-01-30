@@ -1,5 +1,5 @@
 {
-  "name": "jsix",
+  "name": "@primeeuler/jsix",
   "description": "POSIX in javascript. JSIX",
   "author": "Jeremy Ebert",
   "version": "0.0.1",
