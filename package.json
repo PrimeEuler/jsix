@@ -1,17 +1,20 @@
 {
   "name": "jsix",
-  "description": "UNIX kernel and shell in javascript. JSIX",
+  "description": "POSIX in javascript. JSIX",
   "author": "Jeremy Ebert",
   "version": "0.0.1",
   "dependencies": {
-        "keypress": "^0.2.1",
-		"ansi": "^0.3.1"
-
+        "@primeeuler/repl": "^0.0.7",
+		"@primeeuler/conflux": "^0.0.2",
+		"node-pty":"^0.9.0",
+		"rfb2":"^0.2.2",
+		"pngjs":"^3.4.0",
+		"requirejs":"^2.3.6"
     },
     "repository": {
     "type": "git",
     "url": "https://github.com/PrimeEuler/jsix.git"
    },
-   "keywords": [ "kernel", "shell", "UNIX", "JSIX" ],
+   "keywords": [ "kernel", "shell", "posix", "jsix" ],
    "license": "MIT"
 }
