@@ -144,8 +144,16 @@ var edit        = function(stream, path){
     net.on('socket', function( socket, options ){
         net.sockets[socket.id] = socket
         socket.on('error',shell.print)
+        socket.on('end',function(){
+            shell.print({id:socket.id, event:'end'})
+            delete( net.sockets[socket.id] )
+        })
+        socket.on('disconnect',function(){
+            shell.print({id:socket.id, event:'disconnect'})
+            delete( net.sockets[socket.id] )
+        })
         //client info
-        shell.print(socket.handshake)
+        shell.print({id:socket.id, handshake: socket.handshake} )
     })
     net.on('stream', function( stream, options, socket ){
         shell.print( options )
@@ -260,23 +268,33 @@ var edit        = function(stream, path){
                                     clearInterval(s.interval)
                                     r.end()
                                     s.emit('socket.io',{event:'end'})
+                                    s_kill()
                                 });
                                 s.on('close', function () {
                                     sh.print({event:'close'})
                                     clearInterval(s.interval)
                                     r.end()
+                                    s_kill()
                                 });
-                                
+                                function s_kill(){
+                                    const index = sh.context.streams.indexOf(s);
+                                    if (index > -1) {
+                                      sh.context.streams.splice(index, 1);
+                                    }
+                                }
                                 sh.context.rfbConnection = r;     
                                 sh.context.streams.push(s)
+                                
+                                
                                 return host
                             
                         }
                         sh.context.repl     = function(id){
-                            var vt100       = net.createStream({ objectMode:true, service:'vt100'}, socket);
+                            var vt100       = net.createStream({ objectMode:true, service:'vt100', mimeType:'text/x-ansi'}, socket);
                             var web_repl    = net.createStream({ 
                                 objectMode:true, 
                                 service:'repl', 
+                                mimeType:'text/x-ansi',
                                 home:net.sockets[id].handshake.address
                                 
                             }, net.sockets[id]);
@@ -304,10 +322,25 @@ var edit        = function(stream, path){
                                     decoder.on('end', function () {
                                         sh.print({ service:dec.service, event:'end'})
                                         encoder.emit('socket.io',{event:'end'})
+                                        s_kill()
                                     });
                                     
                                     sh.context.streams.push(encoder)
                                     sh.context.streams.push(decoder)
+                                    
+                                    
+                                    function s_kill(){
+                                        var index = sh.context.streams.indexOf(encoder);
+                                        if (index > -1) {
+                                          sh.context.streams.splice(index, 1);
+                                        }
+                                        index = sh.context.streams.indexOf(decoder);
+                                        if (index > -1) {
+                                          sh.context.streams.splice(index, 1);
+                                        }
+                                    }
+                                    
+                                    
                                 })
                             
                         }
