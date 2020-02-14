@@ -76,9 +76,12 @@ var init        = function(sh){
                 
             }
                 sh.isRaw = true
+                //todo flow control
                 sh.io
                     .pipe( spawn, { end:false } )
                     .pipe( sh.io, { end:false } )
+                
+                    
                 sh.on('resize',resize)
                 resize([sh.columns,sh.rows])
                 spawn.on('exit',resume)
@@ -299,6 +302,9 @@ var edit        = function(stream, path){
                                 
                             }, net.sockets[id]);
                                 vt100.pipe(web_repl).pipe(vt100)
+                                vt100.on('resize',function(size){
+                                    web_repl.emit('socket.io', { event:'resize', data: size })
+                                })
                             return id
                         }
                         sh.context.streamUserMedia = function(constraints,src,dst){
@@ -318,6 +324,7 @@ var edit        = function(stream, path){
                                     
                                     sh.print(dec)
                                     var decoder = net.createStream( dec, dst? net.sockets[dst] : socket ) ;
+                                    decoder.on('error', sh.print )
                                     encoder.pipe(decoder)
                                     decoder.on('end', function () {
                                         sh.print({ service:dec.service, event:'end'})
@@ -342,6 +349,8 @@ var edit        = function(stream, path){
                                     
                                     
                                 })
+                                
+                                encoder.on('error', sh.print )
                             
                         }
                     break;
