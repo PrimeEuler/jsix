@@ -2,10 +2,10 @@
   "name": "@primeeuler/jsix",
   "description": "POSIX in javascript. JSIX",
   "author": "Jeremy Ebert",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "dependencies": {
-        "@primeeuler/repl": "^0.0.7",
-	"@primeeuler/conflux": "^0.0.2",
+        "@primeeuler/repl": "^0.0.9",
+	"@primeeuler/conflux": "^0.0.3",
 	"node-pty":"^0.9.0",
 	"rfb2":"^0.2.2",
 	"pngjs":"^3.4.0",

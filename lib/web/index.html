@@ -39,7 +39,7 @@
 <body >
     <script type="text/javascript">
     var repl        = require('repl')
-    var conflux     = require('conflux')
+    var network     = require('conflux')
     var xIndex      = 0;
     var socket      = { connected:false };
     var eve         = {
@@ -60,7 +60,7 @@
             "severity": 1
         }
     }
-    var cfx         = new conflux()
+    var net         = new network()
     var control     = {
             socket: {
                 url:window.location.href,
@@ -68,12 +68,12 @@
                 rtt:0,
                 connect:function(){
                     var rtt = Xwindow.sparkline("control.socket.rtt.plot", "control.socket.rtt", 0 )
-                        cfx.connect( io, control.socket.url, ss)
-                        cfx.on('rtt',function(){
+                        net.connect( io, control.socket.url, ss)
+                        net.on('rtt',function(){
                             control.socket.rtt = socket.rtt
                             rtt.update(socket.rtt)
                         })
-                        cfx.on('error',function(e){
+                        net.on('error',function(e){
                             control.socket.error = e
                             control.socket.connected = socket.connected
                         })
@@ -103,7 +103,7 @@
                                             var element = mediaInterface.createMediaElement(decoder)
                                                 encoder.ondata = decoder.appendBuffer 
                                                 element.video.addEventListener('canplay',function(){
-                                                    var X = {   id: stream.id + 'decoder',
+                                                    var X = {   id: stream.id,
                                                                 width: element.video.videoWidth + 30, 
                                                                 height: element.video.videoHeight + 50,
                                                                 end:function(){
@@ -127,7 +127,7 @@
                                         }); }
                         },
                     remote:function(){
-                        var stream =  cfx.createStream({ objectMode:true, service:'repl'  },socket)
+                        var stream =  net.createStream({ objectMode:true, service:'repl'  },socket)
                             stream.setSize = function(size){
                                 stream.emit('socket.io',{ event:'resize', data:size })
                             }
@@ -136,10 +136,11 @@
                 }
             }
     };
+        //html
         $('<div/>', { id:'control' } ).appendTo( "body" )
         Xwindow.js2html(control,'control')
-        
-        cfx.on('socket',function(sock){
+        //network
+        net.on('socket',function(sock){
                 socket = sock
                 socket.on('error',function(e){
                     control.socket.error = e
@@ -150,7 +151,7 @@
                 control.socket.connected = socket.connected
                 
         })
-        cfx.on('stream',function(stream, options, socket){
+        net.on('stream',function(stream, options, socket){
              switch(options.service){
                 case 'editor':
     	            stream.path = options.path
@@ -179,7 +180,7 @@
                             var encoder = mediaInterface.createMediaEncoder(mstream)
                                 stream.emit('socket.io', { event:'mimeType', data: encoder.mimeType })
                                 encoder.ondata = function(data){
-                                    stream.write( new cfx.ss.Buffer(data) )
+                                    stream.write( new net.ss.Buffer(data) )
                                 }
                                 function kill(){
                                     encoder.stop()
@@ -213,7 +214,7 @@
                             X.height    = element.video.videoHeight + 50
                             Xwindow.xwindow(X)  
                             $(element.canvas).appendTo( $("#" + X.id ) )
-                            $("#" + X.id).dialog('option', 'title',  X.id + '-decoder');
+                            //$("#" + X.id).dialog('option', 'title',  X.id );
                             
                         })
                         stream.on('data', decoder.appendBuffer )

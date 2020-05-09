@@ -1,9 +1,10 @@
+//var repl        = require('@primeeuler/repl');
 var repl        = require('@primeeuler/repl');
 var network     = require('@primeeuler/conflux');
 var pty         = require('node-pty');
+var serialport  = require('serialport')
 var os          = require('os');
 var fs          = require('fs');
-var inspect     = require('util').inspect
 var rfb         = require('rfb2');
 var Png         = require('pngjs').PNG;
 var requirejs   = require("requirejs");
@@ -92,6 +93,42 @@ var init        = function(sh){
         sh.context.login    = function(){
             login(sh)
         }
+        sh.context.serial   = function(path, speed){
+            var port    = new serialport(path || '/dev/ttyUSB0' , { baudRate: speed || 115200 })
+            var resume  = function(){
+                sh.io.unpipe(port)
+                //spawn.unpipe(sh.io)
+                //cleanup pipe
+                sh.io.removeAllListeners('unpipe')
+                sh.io.removeAllListeners('drain')
+                sh.io.removeAllListeners('error')
+                sh.io.removeAllListeners('close')
+                sh.io.removeAllListeners('finish')
+                //cleanup terminal
+                //sh.removeListener('resize',resize)
+                port.destroy()
+                sh.isRaw = false
+                sh.io.resume()
+                sh.loop()
+                
+            }
+                sh.isRaw = true
+                //todo flow control
+                sh.io
+                    .pipe( port, { end:false } )
+                    .pipe( sh.io, { end:false } )
+                
+                    
+                //sh.on('resize',resize)
+                //resize([sh.columns,sh.rows])
+                port.on('exit',resume)
+                port.on('close',resume)
+                port.on('end',resume)
+                port.on('error', sh.print)
+                port.on('error', resume)
+                
+
+        }
         sh.context.network  = net
         sh.context.print = sh.print
 }
@@ -123,6 +160,9 @@ var edit        = function(stream, path){
     }
     
     
+    
+    
+    
 //  terminal emulator process    
     if(process.stdin.isTTY){
         process.stdin.setRawMode( true )
@@ -140,6 +180,9 @@ var edit        = function(stream, path){
     shell.on('close',kill)
 //  authenticate 
     login( shell )
+    
+    
+    
 //  networking
     net.sockets = {}
     net.use(__dirname + '/lib/web/')
@@ -183,11 +226,11 @@ var edit        = function(stream, path){
                             var options = { objectMode:true, service:'rfb'}
                             var s   = net.createStream(options, socket);
                             var r   = rfb.createConnection({
-                                host: '127.0.0.1',
-                                port: 5901,
-                                password: 'testvnc',
-                                securityType: 'vnc'
-                            });
+                                        host: '127.0.0.1',
+                                        port: 5901,
+                                        password: 'testvnc',
+                                        securityType: 'vnc'
+                                    });
                             function encodeFrame(rect) {
                                 var png = new Png({
                                     width: rect.width,
@@ -361,7 +404,7 @@ var edit        = function(stream, path){
                     })
                     break;
                 case 'sub':
-                    var subscriber = cfx.pubsub.subscribe( options.channel, function(msg,data){ 
+                    var subscriber = net.pubsub.subscribe( options.channel, function(msg,data){ 
                             stream.write(data)
                     })
                     stream.on('end',function(){
@@ -370,14 +413,5 @@ var edit        = function(stream, path){
                     break;
             }
     })
-    //net.listen( 8443, function(){ shell.print( this.address() ) } )
-    
-
-    
-    
-    
-    
-    
-    
-    
+    //net.listen( 8443, shell.print )
     
